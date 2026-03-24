@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario FAD 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Roboto+Slab:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#fff;--bg2:#f5f7fa;--bg3:#eef0f3;--text:#222;--text2:#666;--text3:#999;--border:#e0e0e0;--blue:#0f3460;}
+@media(prefers-color-scheme:dark){:root{--bg:#1a1a1a;--bg2:#242424;--bg3:#2e2e2e;--text:#e8e8e8;--text2:#a0a0a0;--text3:#666;--border:#333;--blue:#4a90d9;}}
+body{font-family:'Roboto',sans-serif;background:var(--bg3);min-height:100vh;padding:1rem;}
+#app{max-width:680px;margin:0 auto;background:var(--bg);border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,.1);}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:10px;}
+.top-bar select{font-family:'Roboto',sans-serif;font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);}
+.btn-sm{font-family:'Roboto',sans-serif;font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;}
+.btn-sm:hover{background:var(--bg2);}
+.btn-sm.active{background:var(--blue);color:white;border-color:var(--blue);}
+.cd-section-title{font-family:'Roboto Slab',serif;font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.cd-primary{background:var(--bg2);border-radius:12px;padding:1rem 1.25rem;margin-bottom:8px;}
+.cd-num-row{display:flex;align-items:baseline;gap:5px;margin-bottom:4px;}
+.cd-days{font-family:'Roboto Slab',serif;font-size:28px;font-weight:600;line-height:1;}
+.cd-dias-label{font-size:14px;color:var(--text2);}
+.cd-title-row{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+.cd-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.cd-title{font-size:15px;font-weight:500;color:var(--text);}
+.cd-date{font-size:12px;color:var(--text2);padding-left:18px;}
+.cd-secondary{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cd-sec{background:var(--bg2);border-radius:8px;padding:10px 12px;}
+.cd-sec-num-row{display:flex;align-items:baseline;gap:4px;margin-bottom:2px;}
+.cd-sec-days{font-family:'Roboto Slab',serif;font-size:18px;font-weight:600;line-height:1;}
+.cd-sec-dias{font-size:12px;color:var(--text2);}
+.cd-sec-title-row{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
+.cd-sec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.cd-sec-title{font-size:12px;font-weight:500;color:var(--text);}
+.cd-sec-date{font-size:11px;color:var(--text2);padding-left:14px;}
+.cd-empty{font-size:13px;color:var(--text2);padding:1rem 0;}
+.countdown-area{margin-bottom:1.5rem;}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.month-label{font-family:'Roboto Slab',serif;font-size:18px;font-weight:600;color:var(--text);}
+.nav-btns{display:flex;gap:6px;}
+.nav-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.nav-btn:hover{background:var(--bg2);}
+.day-headers{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));margin-bottom:6px;}
+.dh{text-align:center;font-size:11px;color:var(--text2);padding:4px 0;font-weight:500;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;}
+.day-cell{display:flex;flex-direction:column;align-items:center;padding:6px 2px 8px;cursor:pointer;border-radius:8px;min-height:56px;}
+.day-cell:hover{background:var(--bg2);}
+.day-cell.empty{cursor:default;}
+.day-cell.empty:hover{background:transparent;}
+.day-circle{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--text);flex-shrink:0;}
+.day-circle.weekend{color:var(--text3);}
+.day-circle.today{border:2px solid var(--blue);color:var(--blue);}
+.day-circle.has-event{color:white;}
+.day-circle.receso{background:#b4b2a9;color:white;}
+.dots-row{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;justify-content:center;max-width:40px;}
+.ev-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:100;}
+.modal{background:var(--bg);border-radius:12px;border:1px solid var(--border);padding:1.25rem;width:90%;max-width:320px;position:relative;}
+.modal-close{position:absolute;top:8px;right:10px;font-size:22px;background:none;border:none;cursor:pointer;color:var(--text2);line-height:1;padding:2px 6px;}
+.modal-date{font-family:'Roboto Slab',serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:1rem;padding-right:28px;}
+.modal-event{padding:8px 0;border-bottom:1px solid var(--border);}
+.modal-event:last-child{border-bottom:none;}
+.modal-ev-header{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.modal-ev-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.modal-ev-title{font-size:13px;font-weight:500;color:var(--text);}
+.modal-ev-type{font-size:11px;color:var(--text2);margin-left:20px;margin-bottom:4px;}
+.modal-ev-desc{font-size:13px;color:var(--text2);margin-top:8px;margin-left:20px;line-height:1.6;}
+.modal-ev-desc a{color:var(--blue);word-break:break-all;}
+.modal-empty{font-size:13px;color:var(--text2);}
+.admin-panel{background:var(--bg2);border-radius:12px;border:1px solid var(--border);padding:1.25rem;margin-bottom:1.5rem;}
+.ap-title{font-family:'Roboto Slab',serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:1rem;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.form-row.three{grid-template-columns:1fr 1fr 1fr;}
+.fg{display:flex;flex-direction:column;gap:3px;}
+.fg label{font-size:11px;color:var(--text2);}
+.fg input,.fg select,.fg textarea{font-family:'Roboto',sans-serif;font-size:13px;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);}
+.fg textarea{resize:vertical;min-height:60px;}
+.fg input.error{border-color:#b74c5d;}
+.error-msg{font-size:11px;color:#b74c5d;margin-top:2px;display:none;}
+.check-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:var(--text);}
+.btn-primary{font-family:'Roboto',sans-serif;font-size:13px;padding:7px 18px;border-radius:8px;border:none;background:var(--blue);color:white;cursor:pointer;font-weight:500;}
+.btn-primary:hover{opacity:.9;}
+.btn-primary.editing{background:#2a7b92;}
+.btn-cancel{font-family:'Roboto',sans-serif;font-size:13px;padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;margin-left:8px;}
+.btn-logout{font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;}
+.login-box{background:var(--bg2);border-radius:12px;border:1px solid var(--border);padding:1.25rem;margin-bottom:1.5rem;max-width:300px;}
+.login-err{font-size:12px;color:#b74c5d;margin-top:5px;display:none;}
+.ev-list{margin-top:10px;}
+.ev-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.ev-row:last-child{border-bottom:none;}
+.ev-actions{display:flex;gap:4px;flex-shrink:0;}
+.icon-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.icon-btn:hover{background:var(--bg3);}
+.icon-btn svg{width:14px;height:14px;}
+.icon-btn.del svg{stroke:#b74c5d;}
+.icon-btn.edit svg{stroke:var(--text2);}
+@media(max-width:480px){#app{padding:1rem;border-radius:0;}body{padding:0;}.cd-secondary{grid-template-columns:1fr;}.form-row.three{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top-bar">
+    <select id="materia-sel">
+      <option value="" disabled selected>Elegir asignatura</option>
+      <option value="Tecno2">Tecnología 2</option>
+      <option value="IDI">Intro al Diseño Industrial</option>
+      <option value="DPF">Diseño de Productos Final</option>
+      <option value="DP3">Diseño de Productos 3</option>
+      <option value="ExDC">Experimentación D. y Color</option>
+      <option value="DeX">Diseño de Experiencias Dig.</option>
+      <option value="ArDi">Arte y Diseño Digital</option>
+    </select>
+    <button class="btn-sm" id="admin-btn" onclick="toggleLogin()">Panel docente</button>
+  </div>
+  <div id="login-box" style="display:none;">
+    <div class="login-box">
+      <div style="font-family:'Roboto Slab',serif;font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--text);">Acceso docente</div>
+      <div class="fg" style="margin-bottom:8px;"><label>Materia</label>
+        <select id="login-mat">
+          <option value="Tecno2">Tecnología 2</option>
+          <option value="IDI">Intro al Diseño Industrial</option>
+          <option value="DPF">Diseño de Productos Final</option>
+          <option value="DP3">Diseño de Productos 3</option>
+          <option value="ExDC">Experimentación D. y Color</option>
+          <option value="DeX">Diseño de Experiencias Dig.</option>
+          <option value="ArDi">Arte y Diseño Digital</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:10px;"><label>Contrasena</label>
+        <input type="password" id="login-pass" placeholder="Contrasena"/>
+        <div class="login-err" id="login-err">Contrasena incorrecta</div>
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Ingresar</button>
+    </div>
+  </div>
+  <div id="admin-box" style="display:none;">
+    <div class="admin-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="ap-title" id="ap-name"></div>
+        <button class="btn-logout" onclick="doLogout()">Cerrar sesion</button>
+      </div>
+      <div class="form-row three">
+        <div class="fg"><label>Fecha</label><input type="date" id="ev-date"/></div>
+        <div class="fg"><label>Etiqueta</label>
+          <select id="ev-tipo">
+            <option value="entrega_tp">Entrega TP</option>
+            <option value="pre_entrega">Pre entrega TP</option>
+            <option value="recuperatorio_tp">Recuperatorio TP</option>
+            <option value="parcial">Examen Parcial</option>
+            <option value="recuperatorio_parcial">Recuperatorio Parcial</option>
+            <option value="extension">Act. de Extension</option>
+            <option value="social">Act. Social</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Titulo *</label>
+          <input type="text" id="ev-titulo" placeholder="Ej: TP1 Materiales"/>
+          <div class="error-msg" id="titulo-err">El titulo es obligatorio</div>
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:10px;">
+        <label>Descripcion / notas (opcional)</label>
+        <textarea id="ev-desc" placeholder="Texto adicional o enlace..."></textarea>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="ev-destacado" style="width:14px;height:14px;"/>
+        <label for="ev-destacado">Marcar como evento destacado</label>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <button class="btn-primary" id="btn-guardar" onclick="saveEvent()">Agregar</button>
+        <button class="btn-cancel" id="btn-cancelar" style="display:none;" onclick="cancelEdit()">Cancelar</button>
+      </div>
+      <div class="ev-list" id="ev-list"></div>
+    </div>
+  </div>
+  <div id="countdown-area" class="countdown-area"></div>
+  <div class="nav-row">
+    <div class="month-label" id="month-label"></div>
+    <div class="nav-btns">
+      <button class="nav-btn" onclick="changeMonth(-1)">&#8592;</button>
+      <button class="nav-btn" onclick="changeMonth(1)">&#8594;</button>
+    </div>
+  </div>
+  <div class="day-headers" id="day-headers"></div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div class="legend" id="legend"></div>
+</div>
+<div id="modal-container"></div>
+
+<script>
+var SCRIPT_URL="https://script.google.com/macros/s/AKfycbwowZgWZhdFpcCpYSQjhro4Wkp3MTdtDKUL_02qlSYoJSKu8x4Fc7wEzeNeiHcUoWQMZg/exec";
+var MATERIAS={Tecno2:"Tecnologia 2",IDI:"Intro al Diseno Industrial",DPF:"Diseno de Productos Final",DP3:"Diseno de Productos 3",ExDC:"Experimentacion D. y Color",DeX:"Diseno de Experiencias Dig.",ArDi:"Arte y Diseno Digital"};
+var ETIQUETAS={
+  entrega_tp:{label:"Entrega TP",color:"#2a7b92"},
+  pre_entrega:{label:"Pre entrega TP",color:"#5e98c2"},
+  recuperatorio_tp:{label:"Recuperatorio TP",color:"#446e8d"},
+  parcial:{label:"Examen Parcial",color:"#b74c5d"},
+  recuperatorio_parcial:{label:"Recuperatorio Parcial",color:"#e47539"},
+  extension:{label:"Act. de Extension",color:"#566735"},
+  social:{label:"Act. Social",color:"#90ae59"},
+  otro:{label:"Otro",color:"#a27d44"}
+};
+var INST_COLOR="#888780";
+var FERIADOS=[
+  {d:"2026-01-01",t:"Anio nuevo"},{d:"2026-02-16",t:"Carnaval"},{d:"2026-02-17",t:"Carnaval"},
+  {d:"2026-03-07",t:"Vendimia"},{d:"2026-03-08",t:"Dia de la Mujer"},{d:"2026-03-23",t:"Feriado puente"},
+  {d:"2026-03-24",t:"Dia de la Memoria"},{d:"2026-04-02",t:"Dia del Veterano"},{d:"2026-04-03",t:"Viernes Santo"},
+  {d:"2026-05-01",t:"Dia del Trabajador"},{d:"2026-05-25",t:"Revolucion de Mayo"},
+  {d:"2026-06-15",t:"Guemes / Reforma Univ."},{d:"2026-06-20",t:"Fallec. Belgrano"},
+  {d:"2026-07-09",t:"Dia Independencia"},{d:"2026-07-10",t:"Feriado puente"},
+  {d:"2026-08-16",t:"Aniversario UNCUYO"},{d:"2026-08-17",t:"Fallec. San Martin"},
+  {d:"2026-09-17",t:"Dia del Profesor/a"},{d:"2026-09-21",t:"Dia del Estudiante"},
+  {d:"2026-10-12",t:"Diversidad Cultural"},{d:"2026-10-24",t:"Dia del Disenador/a"},
+  {d:"2026-11-23",t:"Soberania Nacional"},{d:"2026-12-07",t:"Feriado puente"},
+  {d:"2026-12-08",t:"Inmaculada Concepcion"},{d:"2026-12-25",t:"Navidad"}
+];
+var MESAS=[
+  {from:"2026-05-11",to:"2026-05-15",t:"Mesa examenes mayo"},
+  {from:"2026-07-27",to:"2026-07-31",t:"Mesa jul. 1er turno"},
+  {from:"2026-08-10",to:"2026-08-14",t:"Mesa ago. 2do turno"},
+  {from:"2026-09-14",to:"2026-09-18",t:"Mesa sept."},
+  {from:"2026-11-30",to:"2026-12-04",t:"Mesa nov/dic 1er turno"},
+  {from:"2026-12-14",to:"2026-12-18",t:"Mesa nov/dic 2do turno"},
+  {from:"2027-02-22",to:"2027-02-26",t:"Mesa feb/mar 1er turno"},
+  {from:"2027-03-09",to:"2027-03-15",t:"Mesa feb/mar 2do turno"}
+];
+var RECESO={from:"2026-07-06",to:"2026-07-17"};
+var INSCR=[
+  {from:"2026-05-04",to:"2026-05-10",t:"Inscr. mesa mayo"},
+  {from:"2026-07-20",to:"2026-07-24",t:"Inscr. mesa jul."},
+  {from:"2026-08-03",to:"2026-08-07",t:"Inscr. mesa ago."},
+  {from:"2026-09-07",to:"2026-09-11",t:"Inscr. mesa sept."},
+  {from:"2026-11-23",to:"2026-11-27",t:"Inscr. mesa nov/dic"},
+  {from:"2026-12-07",to:"2026-12-11",t:"Inscr. mesa dic."}
+];
+
+var curYear=2026,curMonth=2,selectedMat="",isAdmin=false,adminMat=null,editingId=null,loginPass="";
+var customEvents=[];
+
+function normalizeDate(val){
+  if(!val) return "";
+  var s=String(val).trim();
+  if(s.length>=10) return s.substring(0,10);
+  return s;
+}
+
+function loadEvents(){
+  if(!selectedMat){customEvents=[];renderCalendar();return;}
+  var url=SCRIPT_URL+"?materia="+selectedMat;
+  fetch(url).then(function(r){return r.json();}).then(function(data){
+    if(data.ok){
+      customEvents=data.events.map(function(ev){
+        return {
+          id:String(ev.id).trim(),
+          materia:String(ev.materia).trim(),
+          date:normalizeDate(ev.date),
+          tipo:String(ev.tipo).trim(),
+          titulo:String(ev.titulo).trim(),
+          desc:ev.desc?String(ev.desc).trim():"",
+          destacado:ev.destacado===true||ev.destacado==="TRUE"||ev.destacado==="true"
+        };
+      });
+    }
+    renderCalendar();
+  }).catch(function(e){console.error(e);renderCalendar();});
+}
+
+function apiPost(body){
+  return fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+
+function dateRange(from,to){
+  var r=[],d=new Date(from+"T12:00:00"),e=new Date(to+"T12:00:00");
+  while(d<=e){r.push(d.toISOString().substring(0,10));d.setDate(d.getDate()+1);}
+  return r;
+}
+function isReceso(ds){return dateRange(RECESO.from,RECESO.to).indexOf(ds)>-1;}
+function todayStr(){return new Date().toISOString().substring(0,10);}
+function linkify(t){if(!t)return"";return t.replace(/(https?:\/\/[^\s]+)/g,function(u){return'<a href="'+u+'" target="_blank" style="word-break:break-all;">'+u+'</a>';});}
+function diaLabel(n){return n===1?"dia para:":"dias para:";}
+
+function getInstEvents(ds){
+  var evs=[];
+  FERIADOS.forEach(function(f){if(f.d===ds)evs.push({t:f.t,color:INST_COLOR,inst:true});});
+  MESAS.forEach(function(m){if(dateRange(m.from,m.to).indexOf(ds)>-1)evs.push({t:m.t,color:"#b4b2a9",inst:true});});
+  INSCR.forEach(function(i){if(dateRange(i.from,i.to).indexOf(ds)>-1)evs.push({t:i.t,color:"#b4b2a9",inst:true});});
+  if(dateRange(RECESO.from,RECESO.to).indexOf(ds)>-1)evs.push({t:"Receso invernal",color:"#b4b2a9",inst:true});
+  return evs;
+}
+function getMatEvents(ds){
+  var evs=[];
+  if(!selectedMat) return evs;
+  customEvents.forEach(function(ev){
+    if(ev.date===ds&&(selectedMat===ev.materia)){
+      var et=ETIQUETAS[ev.tipo]||{label:"Otro",color:"#a27d44"};
+      evs.push({t:ev.titulo,color:et.color,label:et.label,destacado:ev.destacado,id:ev.id,tipo:ev.tipo,desc:ev.desc||""});
+    }
+  });
+  return evs;
+}
+
+function renderCountdown(){
+  var area=document.getElementById("countdown-area");
+  if(!selectedMat){area.innerHTML="";return;}
+  var today=new Date(todayStr()+"T12:00:00");
+  var upcoming=customEvents.filter(function(ev){return ev.materia===selectedMat&&ev.date>=todayStr();}).sort(function(a,b){return a.date.localeCompare(b.date);});
+  if(upcoming.length===0){area.innerHTML='<div class="cd-empty">No hay eventos proximos cargados para esta materia.</div>';return;}
+  var destacados=upcoming.filter(function(e){return e.destacado;}).slice(0,2);
+  var normales=upcoming.filter(function(e){return !e.destacado;});
+  var primary=destacados.length>0?destacados[0]:upcoming[0];
+  var secondaries=(destacados.length>0?destacados.slice(1).concat(normales):upcoming.slice(1)).slice(0,2);
+  function daysUntil(ds){return Math.max(0,Math.round((new Date(ds+"T12:00:00")-today)/(1000*60*60*24)));}
+  function fmtDate(ds){var mo=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];var d=new Date(ds+"T12:00:00");return d.getDate()+" "+mo[d.getMonth()]+" "+d.getFullYear();}
+  var et=ETIQUETAS[primary.tipo]||{label:"Otro",color:"#a27d44"};
+  var pd=daysUntil(primary.date);
+  var html='<div class="cd-section-title" style="margin-bottom:10px;">Proximos eventos</div>'
+    +'<div class="cd-primary">'
+    +'<div class="cd-num-row"><span class="cd-days" style="color:'+et.color+';">'+pd+'</span><span class="cd-dias-label">'+diaLabel(pd)+'</span></div>'
+    +'<div class="cd-title-row"><div class="cd-dot" style="background:'+et.color+';"></div><span class="cd-title">'+primary.titulo+'</span></div>'
+    +'<div class="cd-date">'+fmtDate(primary.date)+' &mdash; '+et.label+'</div>'
+    +'</div>';
+  if(secondaries.length>0){
+    html+='<div class="cd-secondary">';
+    secondaries.forEach(function(ev){
+      var e2=ETIQUETAS[ev.tipo]||{label:"Otro",color:"#a27d44"};
+      var sd=daysUntil(ev.date);
+      html+='<div class="cd-sec"><div class="cd-sec-num-row"><span class="cd-sec-days" style="color:'+e2.color+';">'+sd+'</span><span class="cd-sec-dias">'+diaLabel(sd)+'</span></div>'
+        +'<div class="cd-sec-title-row"><div class="cd-sec-dot" style="background:'+e2.color+';"></div><span class="cd-sec-title">'+ev.titulo+'</span></div>'
+        +'<div class="cd-sec-date">'+fmtDate(ev.date)+' &mdash; '+e2.label+'</div></div>';
+    });
+    html+='</div>';
+  }
+  area.innerHTML=html;
+}
+
+function renderHeaders(){document.getElementById("day-headers").innerHTML=["Lun","Mar","Mie","Jue","Vie","Sab","Dom"].map(function(d){return'<div class="dh">'+d+'</div>';}).join("");}
+
+function renderCalendar(){
+  var months=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  document.getElementById("month-label").textContent=months[curMonth]+" "+curYear;
+  var grid=document.getElementById("cal-grid");grid.innerHTML="";
+  var startDow=new Date(curYear,curMonth,1).getDay();startDow=startDow===0?6:startDow-1;
+  var daysInMonth=new Date(curYear,curMonth+1,0).getDate();var today=todayStr();
+  for(var i=0;i<startDow;i++){var c=document.createElement("div");c.className="day-cell empty";grid.appendChild(c);}
+  for(var day=1;day<=daysInMonth;day++){
+    var ds=curYear+"-"+String(curMonth+1).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+    var dow=new Date(ds+"T12:00:00").getDay();var isWe=dow===0||dow===6;var rec=isReceso(ds);
+    var instEvs=getInstEvents(ds);var matEvs=getMatEvents(ds);var allEvs=matEvs.concat(instEvs);
+    var cell=document.createElement("div");cell.className="day-cell";
+    (function(d){cell.onclick=function(){openModal(d);};})(ds);
+    var circ=document.createElement("div");circ.className="day-circle"+(isWe?" weekend":"")+(ds===today?" today":"");
+    if(matEvs.length>0&&!rec){circ.style.background=matEvs[0].color;circ.classList.add("has-event");}
+    else if(rec){circ.classList.add("receso");}
+    else if(instEvs.length>0){circ.style.background=INST_COLOR;circ.classList.add("has-event");}
+    circ.textContent=day;cell.appendChild(circ);
+    if(allEvs.length>1){var dr=document.createElement("div");dr.className="dots-row";allEvs.slice(1,4).forEach(function(ev){var dot=document.createElement("div");dot.className="ev-dot";dot.style.background=ev.color;dr.appendChild(dot);});cell.appendChild(dr);}
+    grid.appendChild(cell);
+  }
+  renderLegend();renderCountdown();
+}
+
+function renderLegend(){
+  var leg=document.getElementById("legend");
+  var html='<div class="leg-item"><div class="leg-dot" style="background:'+INST_COLOR+';"></div>Institucional</div>';
+  var usedTypes={};
+  customEvents.filter(function(e){return selectedMat==="todas"||e.materia===selectedMat;}).forEach(function(e){usedTypes[e.tipo]=true;});
+  var keys=Object.keys(usedTypes);
+  if(!selectedMat||keys.length===0){Object.keys(ETIQUETAS).forEach(function(k){var v=ETIQUETAS[k];html+='<div class="leg-item"><div class="leg-dot" style="background:'+v.color+';"></div>'+v.label+'</div>';});}
+  else{keys.forEach(function(t){var et=ETIQUETAS[t];if(et)html+='<div class="leg-item"><div class="leg-dot" style="background:'+et.color+';"></div>'+et.label+'</div>';});}
+  leg.innerHTML=html;
+}
+
+function openModal(ds){
+  var months=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  var d=new Date(ds+"T12:00:00");var label=d.getDate()+" de "+months[d.getMonth()]+" "+d.getFullYear();
+  var allEvs=getMatEvents(ds).concat(getInstEvents(ds));
+  var existing=document.getElementById("modal-overlay");if(existing)existing.remove();
+  var overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-overlay";
+  overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
+  var evHtml="";
+  if(allEvs.length===0){evHtml='<div class="modal-empty">Sin eventos este dia.</div>';}
+  else{allEvs.forEach(function(ev){var descHtml=ev.desc?'<div class="modal-ev-desc">'+linkify(ev.desc)+'</div>':"";evHtml+='<div class="modal-event"><div class="modal-ev-header"><div class="modal-ev-dot" style="background:'+ev.color+';"></div><div class="modal-ev-title">'+ev.t+'</div></div>'+(ev.label?'<div class="modal-ev-type">'+ev.label+'</div>':'')+(ev.inst?'<div class="modal-ev-type">Calendario institucional</div>':'')+descHtml+'</div>';});}
+  overlay.innerHTML='<div class="modal"><button class="modal-close" onclick="document.getElementById(\'modal-overlay\').remove()">x</button><div class="modal-date">'+label+'</div>'+evHtml+'</div>';
+  document.getElementById("modal-container").appendChild(overlay);
+}
+
+function changeMonth(dir){curMonth+=dir;if(curMonth<0){curMonth=11;curYear--;}if(curMonth>11){curMonth=0;curYear++;}renderCalendar();}
+
+document.getElementById("materia-sel").addEventListener("change",function(){selectedMat=this.value;loadEvents();});
+
+function toggleLogin(){
+  if(isAdmin){doLogout();return;}
+  var lb=document.getElementById("login-box");lb.style.display=lb.style.display==="none"?"block":"none";
+  document.getElementById("admin-btn").classList.toggle("active",lb.style.display!=="none");
+}
+
+function doLogin(){
+  var mat=document.getElementById("login-mat").value;
+  var pass=document.getElementById("login-pass").value;
+  apiPost({action:"auth",materia:mat,password:pass}).then(function(res){
+    if(res.ok){
+      isAdmin=true;adminMat=mat;loginPass=pass;
+      document.getElementById("login-box").style.display="none";
+      document.getElementById("admin-box").style.display="block";
+      document.getElementById("ap-name").textContent=MATERIAS[mat]||mat;
+      document.getElementById("login-err").style.display="none";
+      document.getElementById("admin-btn").classList.add("active");
+      renderEvList();
+    }else{document.getElementById("login-err").style.display="block";}
+  });
+}
+
+function doLogout(){isAdmin=false;adminMat=null;loginPass="";editingId=null;document.getElementById("admin-box").style.display="none";document.getElementById("login-box").style.display="none";document.getElementById("admin-btn").classList.remove("active");}
+
+function saveEvent(){
+  var date=document.getElementById("ev-date").value;
+  var tipo=document.getElementById("ev-tipo").value;
+  var titulo=document.getElementById("ev-titulo").value.trim();
+  var desc=document.getElementById("ev-desc").value.trim();
+  var destacado=document.getElementById("ev-destacado").checked;
+  var tituloInput=document.getElementById("ev-titulo");
+  var tituloErr=document.getElementById("titulo-err");
+  if(!titulo){tituloInput.classList.add("error");tituloErr.style.display="block";return;}
+  tituloInput.classList.remove("error");tituloErr.style.display="none";
+  var btn=document.getElementById("btn-guardar");btn.textContent="Guardando...";btn.disabled=true;
+  var event={id:editingId||String(Date.now()),materia:adminMat,date:date,tipo:tipo,titulo:titulo,desc:desc,destacado:destacado};
+  var action=editingId?"edit":"add";
+  apiPost({action:action,materia:adminMat,password:loginPass,event:event}).then(function(res){
+    btn.disabled=false;
+    if(res.ok){
+      editingId=null;btn.textContent="Agregar";btn.classList.remove("editing");
+      document.getElementById("btn-cancelar").style.display="none";
+      document.getElementById("ev-date").value="";document.getElementById("ev-titulo").value="";document.getElementById("ev-desc").value="";document.getElementById("ev-destacado").checked=false;
+      loadEvents();
+    } else {
+      btn.textContent=editingId?"Guardar cambios":"Agregar";
+      alert("Error al guardar. Intentá de nuevo.");
+    }
+  });
+}
+
+function editEvent(id){
+  var ev=null;for(var i=0;i<customEvents.length;i++){if(String(customEvents[i].id)===String(id)){ev=customEvents[i];break;}}
+  if(!ev)return;
+  editingId=id;
+  document.getElementById("ev-date").value=ev.date;document.getElementById("ev-tipo").value=ev.tipo;document.getElementById("ev-titulo").value=ev.titulo;document.getElementById("ev-desc").value=ev.desc||"";document.getElementById("ev-destacado").checked=ev.destacado||false;
+  document.getElementById("btn-guardar").textContent="Guardar cambios";document.getElementById("btn-guardar").classList.add("editing");document.getElementById("btn-cancelar").style.display="inline-block";
+  document.getElementById("ev-date").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+function cancelEdit(){
+  editingId=null;document.getElementById("ev-date").value="";document.getElementById("ev-titulo").value="";document.getElementById("ev-desc").value="";document.getElementById("ev-destacado").checked=false;
+  document.getElementById("btn-guardar").textContent="Agregar";document.getElementById("btn-guardar").classList.remove("editing");document.getElementById("btn-cancelar").style.display="none";
+}
+
+function deleteEvent(id){
+  if(!confirm("Eliminar este evento?"))return;
+  apiPost({action:"delete",materia:adminMat,password:loginPass,event:{id:String(id)}}).then(function(res){if(res.ok){loadEvents();renderEvList();}});
+}
+
+function renderEvList(){
+  var list=document.getElementById("ev-list");
+  var mine=customEvents.filter(function(e){return e.materia===adminMat;}).sort(function(a,b){return a.date.localeCompare(b.date);});
+  if(mine.length===0){list.innerHTML='<div style="font-size:12px;color:var(--text2);margin-top:8px;">Sin eventos cargados aun.</div>';return;}
+  var editSvg='<svg viewBox="0 0 16 16" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 2.5l2 2-8 8H3.5v-2l8-8z"/></svg>';
+  var delSvg='<svg viewBox="0 0 16 16" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h10M6 4V2.5h4V4M5 4l.5 9h5l.5-9"/></svg>';
+  list.innerHTML=mine.map(function(ev){return'<div class="ev-row"><div style="flex:1;min-width:0;"><span style="color:var(--text2);">'+ev.date+'</span><span style="margin-left:8px;font-weight:500;">'+ev.titulo+'</span>'+(ev.destacado?'<span style="margin-left:6px;font-size:10px;background:var(--blue);color:white;padding:1px 5px;border-radius:3px;">destacado</span>':'')+'</div><div class="ev-actions"><button class="icon-btn edit" onclick="editEvent(\''+ev.id+'\')" title="Editar">'+editSvg+'</button><button class="icon-btn del" onclick="deleteEvent(\''+ev.id+'\')" title="Eliminar">'+delSvg+'</button></div></div>';}).join("");
+}
+
+renderHeaders();
+loadEvents();
+</script>
+</body>
+</html>
