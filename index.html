@@ -239,7 +239,9 @@ var INSCR=[
   {from:"2026-12-07",to:"2026-12-11",t:"Inscr. mesa dic."}
 ];
 
-var curYear=2026,curMonth=2,selectedMat="",isAdmin=false,adminMat=null,editingId=null,loginPass="";
+var urlParams=new URLSearchParams(window.location.search);
+var urlMateria=urlParams.get("materia")||"";
+var curYear=2026,curMonth=2,selectedMat=urlMateria,isAdmin=false,adminMat=null,editingId=null,loginPass="";
 var customEvents=[];
 
 function normalizeDate(val){
@@ -472,6 +474,13 @@ function renderEvList(){
   list.innerHTML=mine.map(function(ev){return'<div class="ev-row"><div style="flex:1;min-width:0;"><span style="color:var(--text2);">'+ev.date+'</span><span style="margin-left:8px;font-weight:500;">'+ev.titulo+'</span>'+(ev.destacado?'<span style="margin-left:6px;font-size:10px;background:var(--blue);color:white;padding:1px 5px;border-radius:3px;">destacado</span>':'')+'</div><div class="ev-actions"><button class="icon-btn edit" onclick="editEvent(\''+ev.id+'\')" title="Editar">'+editSvg+'</button><button class="icon-btn del" onclick="deleteEvent(\''+ev.id+'\')" title="Eliminar">'+delSvg+'</button></div></div>';}).join("");
 }
 
+if(urlMateria){
+  var sel=document.getElementById("materia-sel");
+  if(sel){
+    sel.value=urlMateria;
+    sel.style.display="none";
+  }
+}
 renderHeaders();
 loadEvents();
 </script>
