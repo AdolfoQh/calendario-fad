@@ -189,6 +189,9 @@ body{font-family:'Roboto',sans-serif;background:var(--bg3);min-height:100vh;padd
   <div class="day-headers" id="day-headers"></div>
   <div class="cal-grid" id="cal-grid"></div>
   <div class="legend" id="legend"></div>
+  <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+    <button id="admin-btn" onclick="toggleLogin()" style="font-family:'Roboto',sans-serif;font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;">Panel docente</button>
+  </div>
 </div>
 <div id="modal-container"></div>
 
@@ -484,6 +487,5 @@ if(urlMateria){
 renderHeaders();
 loadEvents();
 </script>
-<button id="admin-btn" onclick="toggleLogin()" style="position:fixed;bottom:20px;right:20px;font-family:'Roboto',sans-serif;font-size:12px;padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.15);">Panel docente</button>
 </body>
 </html>
