@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inversiones Elda</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f4f8; color: #2C3E50; font-size: 16px; }
+
+    header { background: #1A2B4A; color: white; padding: 20px 16px 0; }
+    header h1 { font-size: 24px; font-weight: 700; }
+    header p { font-size: 14px; color: #a0b0c8; margin-top: 4px; }
+
+    nav { display: flex; margin-top: 16px; }
+    nav button {
+      flex: 1; padding: 12px 4px; border: none; background: transparent;
+      color: #a0b0c8; font-size: 14px; font-weight: 600; cursor: pointer;
+      border-bottom: 3px solid transparent;
+    }
+    nav button.active { color: white; border-bottom: 3px solid #4A90D9; }
+
+    main { padding: 16px; }
+
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .kpi { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .kpi label { font-size: 11px; color: #4A90D9; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi .valor { font-size: 20px; font-weight: 700; color: #1A2B4A; margin-top: 6px; }
+
+    .seccion { background: white; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 16px; }
+    .seccion-header { background: #2E4D7B; color: white; padding: 12px 16px; font-size: 15px; font-weight: 700; }
+
+    .item { padding: 14px 16px; border-bottom: 1px solid #f0f4f8; }
+    .item:last-child { border-bottom: none; }
+    .item-nombre { font-size: 16px; font-weight: 600; color: #1A2B4A; }
+    .item-sub { font-size: 13px; color: #7f8c8d; margin-top: 3px; }
+    .item-monto { font-size: 18px; font-weight: 700; color: #27AE60; margin-top: 8px; }
+
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 6px; }
+    .badge-verde { background: #d5f5e3; color: #27AE60; }
+    .badge-amarillo { background: #fef9e7; color: #F39C12; }
+    .badge-rojo { background: #fdedec; color: #E74C3C; }
+
+    .loading { text-align: center; padding: 40px; color: #7f8c8d; font-size: 15px; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>💼 Inversiones Elda</h1>
+  <p id="fecha-act">Cargando...</p>
+  <nav>
+    <button class="active" onclick="mostrarTab('dashboard', this)">Dashboard</button>
+    <button onclick="mostrarTab('plazos', this)">Plazos</button>
+    <button onclick="mostrarTab('fci', this)">FCI</button>
+    <button onclick="mostrarTab('efectivo', this)">Efectivo</button>
+  </nav>
+</header>
+
+<main>
+  <div id="dashboard" class="tab active"><div class="loading">Cargando...</div></div>
+  <div id="plazos" class="tab"><div class="loading">Cargando...</div></div>
+  <div id="fci" class="tab"><div class="loading">Cargando...</div></div>
+  <div id="efectivo" class="tab"><div class="loading">Cargando...</div></div>
+</main>
+
+<script>
+  const API = 'https://script.google.com/macros/s/AKfycbwq5GwhtBz1QZ-uRhsWzUZ9W5qHsCVVPgedC-tgwv7O4XbUyXa6wAd2AOcvLm63zsKRcA/exec';
+
+  function mostrarTab(id, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function fmt(n) {
+    if (!n && n !== 0) return '-';
+    return '$' + Number(n).toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+  }
+
+  function renderDashboard(d) {
+    return `
+      <div class="kpi-grid">
+        <div class="kpi"><label>Total ARS</label><div class="valor">${fmt(d.totalARS)}</div></div>
+        <div class="kpi"><label>Total USD</label><div class="valor">USD ${Number(d.totalUSD).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2})}</div></div>
+      </div>
+      <div class="seccion">
+        <div class="seccion-header">Distribución</div>
+        ${d.distribucion.map(r => `
+          <div class="item">
+            <div class="item-nombre">${r.tipo}</div>
+            <div class="item-monto">${fmt(r.ars)}</div>
+            <div class="item-sub">${r.pct}% del portafolio</div>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  function renderPlazos(rows) {
+    if (!rows.length) return '<div class="loading">Sin datos cargados</div>';
+    return `<div class="seccion"><div class="seccion-header">Plazos Fijos</div>` +
+      rows.map(r => `
+        <div class="item">
+          <div class="item-nombre">${r.entidad}</div>
+          <div class="item-sub">Vence: ${r.vencimiento} · TNA: ${r.tna}</div>
+          <div class="item-monto">${fmt(r.montoFinal)}</div>
+          <span class="badge ${r.estado.includes('Vigente') ? 'badge-verde' : r.estado.includes('Próximo') ? 'badge-amarillo' : 'badge-rojo'}">${r.estado}</span>
+        </div>`).join('') + '</div>';
+  }
+
+  function renderFCI(rows) {
+    if (!rows.length) return '<div class="loading">Sin datos cargados</div>';
+    return `<div class="seccion"><div class="seccion-header">Fondos Comunes de Inversión</div>` +
+      rows.map(r => `
+        <div class="item">
+          <div class="item-nombre">${r.nombre}</div>
+          <div class="item-sub">${r.gerente} · ${r.tipo}</div>
+          <div class="item-monto">${fmt(r.totalARS)}</div>
+          <div class="item-sub">${Number(r.cuotapartes).toLocaleString('es-AR')} cuotapartes · $${Number(r.valorCP).toLocaleString('es-AR', {minimumFractionDigits:3, maximumFractionDigits:3})} c/u</div>
+        </div>`).join('') + '</div>';
+  }
+
+  function renderEfectivo(rows) {
+    if (!rows.length) return '<div class="loading">Sin datos cargados</div>';
+    return `<div class="seccion"><div class="seccion-header">Efectivo y Cuentas</div>` +
+      rows.map(r => `
+        <div class="item">
+          <div class="item-nombre">${r.descripcion}</div>
+          <div class="item-sub">${r.lugar} · ${r.moneda}</div>
+          <div class="item-monto">${r.moneda === 'USD' ? 'USD ' + Number(r.saldo).toLocaleString('es-AR', {minimumFractionDigits:2}) : fmt(r.saldo)}</div>
+        </div>`).join('') + '</div>';
+  }
+
+  fetch(API)
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('fecha-act').textContent = 'Actualizado: ' + d.fecha;
+      document.getElementById('dashboard').innerHTML = renderDashboard(d);
+      document.getElementById('plazos').innerHTML = renderPlazos(d.plazos);
+      document.getElementById('fci').innerHTML = renderFCI(d.fci);
+      document.getElementById('efectivo').innerHTML = renderEfectivo(d.efectivo);
+    })
+    .catch(e => {
+      document.getElementById('dashboard').innerHTML = '<div class="loading">Error al cargar datos. Intentá de nuevo.</div>';
+    });
+</script>
+</body>
+</html>
